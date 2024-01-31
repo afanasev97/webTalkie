@@ -3,10 +3,13 @@ const { WebSocket } = require('ws');
 const ws = new WebSocket('ws://127.0.0.1:8031');
 const userMsg = 'Privet timur!\nKak ti?';
 
+const userName = 'Ilia'
+
 ws.on('error', console.error);
 
 ws.on('open', function open() {
-	ws.send(formatMsg(userMsg, 'timur'));
+	ws.send(initMsg(userName));
+	// ws.send(formatMsg(userName, userMsg, 'timur'));
 });
 
 ws.on('message', function message(data) {
@@ -14,14 +17,24 @@ ws.on('message', function message(data) {
 });
 
 
-function initMsg() {
+function initMsg(userName) {
+	const initMessage = {
+		header: {
+			from: userName,
+
+		},
+		type: 'init'
+	}
+	return JSON.stringify(initMessage)
+
 
 }
-function formatMsg(userMsg, destination) {
+function formatMsg(userName, userMsg, destination) {
 	const formattedMsg = {
 		header: {
-			from: 'ilia',
-			to: destination
+			from: userName,
+			to: destination,
+			type: 'msg',
 		},
 		msg: userMsg.split('\n')
 	}

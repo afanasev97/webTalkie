@@ -8,9 +8,8 @@ const rawClients = new Map();
 const authorizedClients = new Map();
 wsServer.on('connection', onConnect);
 
-function onConnect(wsClient, req) {
-	log(this)
-	clientAddress = `${req.socket.remoteAddress}:${req.socket.remotePort}`;
+function onConnect(wsClient) {
+	clientAddress = `${wsClient._socket.remoteAddress}:${wsClient._socket.remotePort}`;
 	rawClients.set(clientAddress, wsClient)
 	wsClient.on('error', () => {
 		rawClients.delete(clientAddress);
@@ -22,13 +21,16 @@ function onConnect(wsClient, req) {
 		rawClients.delete(clientAddress);
 	});
 
-	wsClient.on('message', onMessage);
+	wsClient.on('message', (data) => onMessage(data, wsClient));
 
 
 	wsClient.send('something');
 }
 
-function onMessage(data) {
-	const msgToShow = data.toString();
-	log(`new data received:\n ${msgToShow}`);
+function onMessage(data, wsClient) {
+	let msgObj = JSON.parse(String(data));
+	let msgType = msgObj.type
+	if (msgType == 'init') {
+		authorizedClients.set(msgObj.header.from, wsClient)
+	}
 }
