@@ -1,5 +1,10 @@
 {
 	"dependencies": {
 		"ws": "^8.16.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.56.0",
+		"eslint-config-recommended": "^4.1.0",
+		"eslint-config-standard": "^17.1.0"
 	}
 }

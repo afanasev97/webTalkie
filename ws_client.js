@@ -1,28 +1,28 @@
-const { WebSocket } = require('ws');
+const { WebSocket } = require("ws");
 
-const userName = 'Ilia';
+const log = console.log;
+const userName = "Ilia";
 const ws = new WebSocket(`ws://127.0.0.1:8031?username=${userName}`);
 
-const testMsg = 'Privet timur!\nKak ti?';
+const testMsg = "Privet timur!\nKak ti?";
 
+ws.on("error", console.error);
 
-ws.on('error', console.error);
-
-ws.on('open', function open() {
-	ws.send(formatMsg(testMsg, 'Timur'));
+ws.on("open", function open() {
+	ws.send(formatMsg(testMsg, "Timur"));
 });
 
-ws.on('message', onMessage);
+ws.on("message", onMessage);
 
 /* outcome functions */
 function formatMsg(userMsg, destination) {
 	const formattedMsg = {
-		type: 'message',
+		type: "message",
 		header: {
 			destination
 		},
-		msg: userMsg.split('\n')
-	}
+		msg: userMsg.split("\n")
+	};
 	return JSON.stringify(formattedMsg);
 }
 
@@ -38,14 +38,13 @@ function onMessage(data) {
 	}
 }
 
-
 function processMessage(msg) {
 	if (!msg.type) return;
 	switch (msg.type) {
-		case 'message': handleMessage(msg.body, msg.header?.from); return;
-		case 'info': handleInfo(msg.header?.info, msg.body); return;
-		case 'error': handleError(msg.header?.error, msg.body); return;
-		default: log('Unknown message type: ' + msg.type);
+		case "message": handleMessage(msg.body, msg.header?.from); return;
+		case "info": handleInfo(msg.header?.info, msg.body); return;
+		case "error": handleError(msg.header?.error, msg.body); return;
+		default: log("Unknown message type: " + msg.type);
 	}
 }
 
@@ -66,6 +65,6 @@ function handleInfo(headerInfo, info) {
 function handleError(headerError, errorBody) {
 	if (!headerError ||
 		!errorBody) return;
-	const errorToShow = `${headerError}:\n${errorBody}`
+	const errorToShow = `${headerError}:\n${errorBody}`;
 	console.error(errorToShow);
 }

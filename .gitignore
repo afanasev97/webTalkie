@@ -131,3 +131,5 @@ dist
 
 # other files
 *.old.*
+*.lock
+package-lock.json
