@@ -15,6 +15,7 @@ ws.on("open", function open() {
 ws.on("message", onMessage);
 
 /* outcome functions */
+// TODO запретить клиенту отправлять пустые сообщения
 function formatMsg(userMsg, destination) {
 	const formattedMsg = {
 		type: "message",

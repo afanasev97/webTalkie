@@ -2,6 +2,7 @@
 
 const log = console.log;
 const { WebSocketServer } = require("ws");
+const Client = require("./modules/server/client");
 
 const wsServer = new WebSocketServer({ port: 8031 });
 const authorizedClients = new Map();
@@ -15,7 +16,8 @@ function onConnect(wsClient, req) {
 		return;
 	}
 
-	authorizedClients.set(userName, wsClient);
+	const client = new Client(wsClient, userName);
+	authorizedClients.set(userName, client);
 
 	wsClient.on("error", (error) => {
 		log(`Error: ${error}`);
@@ -30,35 +32,7 @@ function onConnect(wsClient, req) {
 		// TODO del from authorizedClients
 	});
 
-	wsClient.on("message", onMessage);
+	wsClient.on("message", (data) => client.onMessage(data));
 
 	wsClient.send("something");
-}
-
-function onMessage(data) {
-	try {
-		const incomeMsg = JSON.parse(data.toString());
-		processMessage(incomeMsg);
-	} catch (e) {
-		log(`Error parsing incomming msg Error: ${e}`);
-		log(`data: ${data}`);
-	}
-}
-
-function processMessage(msg) {
-	if (!msg.type) return;
-	switch (msg.type) {
-		case "message": handleMessage(msg.body, msg.header?.destination); return;
-		case "info": handleInfo(msg.header?.info, msg.body); return;
-		default: log("Unknown message type: " + msg.type);
-	}
-}
-
-function handleMessage(msgBody, destination) {
-	if (!msgBody ||
-		!destination) return;
-	if (authorizedClients.has(destination)) {
-		destinationWsClient = authorizedClients.get(destination);
-		destinationWsClient.send(msgBody);
-	}
 }
