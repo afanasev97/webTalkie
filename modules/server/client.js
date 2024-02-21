@@ -1,9 +1,8 @@
-const log = console.log;
-
 module.exports = class Client {
-	constructor(socket, userName) {
+	constructor(socket, userName, server) {
 		this.socket = socket;
 		this.userName = userName;
+		this.server = server;
 	}
 
 	onMessage(data) {
@@ -11,8 +10,8 @@ module.exports = class Client {
 			const incomeMsg = JSON.parse(data.toString());
 			this.processMessage(incomeMsg);
 		} catch (e) {
-			log(`Error parsing incomming msg Error: ${e}`);
-			log(`data: ${data}`);
+			console.log(`Error parsing incomming msg Error: ${e}`);
+			console.log(`data: ${data}`);
 		}
 	}
 
@@ -21,15 +20,15 @@ module.exports = class Client {
 		switch (msg.type) {
 			case "message": this.handleMessage(msg.body, msg.header?.destination); return;
 			case "info": this.handleInfo(msg.header?.info, msg.body); return;
-			default: log("Unknown message type: " + msg.type);
+			default: console.log("Unknown message type: " + msg.type);
 		}
 	}
 
 	handleMessage(msgBody, destination) {
 		if (!msgBody ||
 		!destination) return;
-		if (authorizedClients.has(destination)) {
-			const destinationWsClient = authorizedClients.get(destination);
+		if (this.server.authorizedClients.has(destination)) {
+			const destinationWsClient = this.server.authorizedClients.get(destination);
 			destinationWsClient.sendMsg(msgBody, destination); // TODO who sender???
 		}
 	}
@@ -43,13 +42,13 @@ module.exports = class Client {
 					header: {
 						info: "online clients:"
 					},
-					body: Array.from(authorizedClients.keys())
+					body: Array.from(this.server.authorizedClients.keys())
 				};
 				const msgToSend = JSON.stringify(msgObj);
 				this.send(msgToSend);
 			}
 				break;
-			default: log("Unknow info request" + info);
+			default: console.log("Unknow info request" + info);
 		}
 	}
 

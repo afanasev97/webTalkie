@@ -1,6 +1,5 @@
 const { WebSocket } = require("ws");
 
-const log = console.log;
 const userName = "Ilia";
 const ws = new WebSocket(`ws://127.0.0.1:8031?username=${userName}`);
 
@@ -34,8 +33,8 @@ function onMessage(data) {
 		const incomeMsg = JSON.parse(data.toString());
 		processMessage(incomeMsg);
 	} catch (e) {
-		log(`Error parsing incomming msg Error: ${e}`);
-		log(`data: ${data}`);
+		console.log(`Error parsing incomming msg Error: ${e}`);
+		console.log(`data: ${data}`);
 	}
 }
 
@@ -45,7 +44,7 @@ function processMessage(msg) {
 		case "message": handleMessage(msg.body, msg.header?.from); return;
 		case "info": handleInfo(msg.header?.info, msg.body); return;
 		case "error": handleError(msg.header?.error, msg.body); return;
-		default: log("Unknown message type: " + msg.type);
+		default: console.log("Unknown message type: " + msg.type);
 	}
 }
 
@@ -53,14 +52,14 @@ function handleMessage(msgBody, from) {
 	if (!msgBody ||
 		!from) return;
 	const msgToShow = `${from}:\n${msgBody}`;
-	log(msgToShow);
+	console.log(msgToShow);
 }
 
 function handleInfo(headerInfo, info) {
 	if (!headerInfo ||
 		!info) return;
 	const msgToShow = `${headerInfo}:\n${info}`;
-	log(msgToShow);
+	console.log(msgToShow);
 }
 
 function handleError(headerError, errorBody) {
