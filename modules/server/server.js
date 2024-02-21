@@ -1,11 +1,11 @@
 const { WebSocketServer } = require("ws");
 const Client = require("./client");
 
-module.exports = class Server extends WebSocketServer {
+module.exports = class Server {
 	constructor(port) {
-		super({ port });
+		this.wsServer = new WebSocketServer({ port });
 		this.authorizedClients = new Map();
-		this.on("connection", this.onConnect);
+		this.wsServer.on("connection", (wsClient, req) => this.onConnect(wsClient, req));
 	}
 
 	onConnect(wsClient, req) {
@@ -28,12 +28,35 @@ module.exports = class Server extends WebSocketServer {
 			console.log(`disconnected with code: ${code}`);
 			if (String(reason)) console.log(`disconnected reason: ${String(reason)}`);
 			this.authorizedClients.delete(userName);
-
-		// TODO del from authorizedClients
 		});
 
 		wsClient.on("message", (data) => client.onMessage(data));
+	}
 
-		wsClient.send("something");
+	sendMessageToUser(msgBody, destination) {
+		if (!msgBody ||
+		!destination) return;
+		if (this.authorizedClients.has(destination)) {
+			const destinationWsClient = this.authorizedClients.get(destination);
+			destinationWsClient.sendMsg(msgBody); // TODO who sender???
+		}
+	}
+
+	handleInfo(info, body, client) {
+		if (!info) return;
+		switch (info) {
+			case "who": {
+				const msgObj = {
+					type: "info",
+					header: {
+						info: "online clients:"
+					},
+					body: Array.from(this.authorizedClients.keys())
+				};
+				client.sendData(msgObj);
+			}
+				break;
+			default: console.log("Unknow info request" + info);
+		}
 	}
 };

@@ -5,10 +5,18 @@ const ws = new WebSocket(`ws://127.0.0.1:8031?username=${userName}`);
 
 const testMsg = "Privet timur!\nKak ti?";
 
+const info = {
+	type: "info",
+	header: {
+		info: "who"
+	}
+};
+
 ws.on("error", console.error);
 
 ws.on("open", function open() {
-	ws.send(formatMsg(testMsg, "Timur"));
+	ws.send(formatMsg(testMsg, "Ilia"));
+	ws.send(JSON.stringify(info));
 });
 
 ws.on("message", onMessage);
@@ -21,9 +29,9 @@ function formatMsg(userMsg, destination) {
 		header: {
 			destination
 		},
-		msg: userMsg.split("\n")
+		body: userMsg.split("\n")
 	};
-	return JSON.stringify(formattedMsg);
+	return JSON.stringify(formattedMsg); //
 }
 
 /* income functions */
@@ -51,7 +59,7 @@ function processMessage(msg) {
 function handleMessage(msgBody, from) {
 	if (!msgBody ||
 		!from) return;
-	const msgToShow = `${from}:\n${msgBody}`;
+	const msgToShow = `${from}:\n${msgBody.join("\n")}`;
 	console.log(msgToShow);
 }
 
